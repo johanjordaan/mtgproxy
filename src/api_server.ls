@@ -97,7 +97,7 @@ drawBorders = (doc,offset,w,h) ->
     .lineTo(w, h/3 *3)
     .stroke()
 
-createDoc = (name,cards) ->
+createDoc = (name,skipBasicLands,cards,text) ->
 
   # Create a document
   doc = new PDFDocument("A4")
@@ -105,6 +105,15 @@ createDoc = (name,cards) ->
   # Pipe it's output somewhere, like to a file or HTTP response
   # See below for browser usage
   doc.pipe fs.createWriteStream(name)
+
+  doc.fontSize 10
+
+  # TODO: The blow needs to be refactored ... Duplicated code
+  text = JSON.parse(text)
+  text = text.replace(/\r?/g, '')
+  #lines = text.split('\n')
+  doc.text text
+  doc.addPage!
 
   #8.267 in × 11.692 in
   offset = 0
@@ -119,15 +128,19 @@ createDoc = (name,cards) ->
   cnt = 0
   for card in cards
     cnt = cnt+1
-    if card.name not in ["Island","Swamp","Plains","Forest","Mountain"]
+    switch card.name in ["Island","Swamp","Plains","Forest","Mountain"] and skipBasicLands
+    | true =>
+    | otherwise =>
       doc.fontSize 8
-      doc.text card.manaCost,(w/3)*x,offset+((h/3)*y)+padding,{ width: w/3 -padding, align: 'right'}
+      if card.manaCost?
+        doc.text card.manaCost,(w/3)*x,offset+((h/3)*y)+padding,{ width: w/3 -padding, align: 'right'}
       doc.fontSize 10
       doc.text card.name,offset+((w/3)*x)+padding,offset+((h/3)*y)+padding,{ width: w/3 , align: 'left'}
       doc.fontSize 8
       doc.text card.type,offset+((w/3)*x)+padding,offset+((h/3)*y)+padding+40,{ width: w/3 , align: 'justify'}
       doc.fontSize 8
-      doc.text card.text,offset+((w/3)*x)+padding,offset+((h/3)*y)+padding+70,{ width: w/3 -(padding*2), align: 'left'}
+      if card.text
+        doc.text card.text,offset+((w/3)*x)+padding,offset+((h/3)*y)+padding+70,{ width: w/3 -(padding*2), align: 'left'}
 
       if card.pt?
         doc.fontSize 12
@@ -196,16 +209,20 @@ loadDeck = (data, cb) ->
 
 app.post '/api/v1/generate/', (req, res) ->
   cardList = req.body.cardList
+  skipBasicLands = req.body.skipBasicLands
+
+  if !skipBasicLands then skipbasicLands = true
+
   db.requests.save {cardList:cardList}, (err, savedRequest) ->
     | err? => res.status(500).send err
     | otherwise =>
       loadDeck cardList, (mainDeck,sideBoard) ->
-        createDoc "./dist/docs/#{savedRequest._id}.pdf" ,mainDeck
+        createDoc "./dist/docs/#{savedRequest._id}.pdf",skipBasicLands,mainDeck++sideBoard,cardList
         res.status(200).send { documentUrl:"#{savedRequest._id}.pdf" }
 
 
 
-app.get '/api/v1/requestcount/', (req, res) ->
-  db.requests.count {}, (err,count) ->
+app.get '/api/v1/stats/', (req, res) ->
+  db.requests.count {}, (err,requestCount) ->
     | err? => res.status(500).send err
-    | otherwise => res.status(200).send { count: count }
+    | otherwise => res.status(200).send { requestCount: requestCount }

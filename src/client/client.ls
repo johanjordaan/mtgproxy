@@ -16,31 +16,47 @@ mainController = ($scope,$timeout,Api) ->
   '''
 
   $scope.link = ""
-  $scope.status = ""
-  $scope.requestCount = 0
+  $scope.requestCount = '...'
+  $scope.hasLink = false
+  $scope.isGenerating = false
+  $scope.skipBasicLands = true
 
   poll = ->
     Api.getRequestCount (data) ->
-      $scope.requestCount = data.count
+      $scope.requestCount = data.requestCount
       $timeout ->
         poll
       ,3000
   poll!
 
+  $scope.$watch 'skipBasicLands', (oldVal,newVal) ->
+    localStorage["mtgproxy.skipBasicLands"] = $scope.skipBasicLands
+
+  $scope.$watch 'deck', (oldVal,newVal) ->
+    localStorage["mtgproxy.deck"] = $scope.deck
+
+  if localStorage["mtgproxy.skipBasicLands"]?
+    $scope.skipBasicLands = localStorage["mtgproxy.skipBasicLands"]
+  if localStorage["mtgproxy.deck"]?
+    $scope.deck = localStorage["mtgproxy.deck"]
+
+
   $scope.generate = ->
-    $scope.status = "Generating..."
-    Api.generate { cardList: JSON.stringify($scope.deck) }, (data)->
+    $scope.isGenerating = true
+    $scope.hasLink = false
+    Api.generate { cardList: JSON.stringify($scope.deck), skipBasicLands: $scope.skipBasicLands }, (data)->
       $scope.link = "/docs/#{data.documentUrl}"
       Api.getRequestCount (data) ->
-        $scope.requestCount = data.count
+        $scope.requestCount = data.requestCount
       $timeout ->
-        $scope.status = "Download"
+        $scope.isGenerating = false
+        $scope.hasLink = true
       , 1000
 
 apiFactory = ($resource,ErrorHandler) ->
   do
     getRequestCount: (cb) ->
-      $resource '/api/v1/requestcount', null
+      $resource '/api/v1/stats', null
       .get {}, {}, cb, ErrorHandler
 
     generate: (data, cb) ->

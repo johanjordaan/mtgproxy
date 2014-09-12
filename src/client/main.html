@@ -1,39 +1,49 @@
 
 
-<div class="row">
-  <div class="col-md-1">
+<div class="left">
+  <textarea rows="25" cols="50" ng-model="deck">
+  </textarea>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" ng-model="skipBasicLands"> skip basic lands ?
+    </label>
   </div>
-  <div class="col-md-3">
-    <textarea rows="15" cols="50" ng-model="deck">
-    </textarea>
-  </div>
-  <div class="col-md-2 row-centered">
-    <button class="btn btn-default" ng-click="generate()" ng-disabled="status=='Generating...'" >Generate ...</button>
-    <br>
-    <a href="{{link}}" ng-if="status.length>0" target="_blank">{{status}}</a>
-    <br>
-    <br>
+</div>
+<div class="right">
+
+  <div class="left centered_cotents">
+    <button class="btn btn-default" ng-click="generate()" ng-disabled="isGenerating" >Generate ...</button>
+    <div style="margin-top:20px;">
+      <div ng-if="isGenerating">Generating ...</div>
+      <div ng-if="hasLink">
+        <a href="{{link}}" target="_blank">View</a> |
+        <a href="{{link}}" download>Download</a>
+      </div>
+      <div ng-if="!isGenerating && !hasLink">&nbsp</div>
+      </div>
     <h2>{{requestCount}}</h2>
+    <i><small>pdf requests served</small></i>
   </div>
-  <div class="col-md-4">
+
+  <div class="inner_right">
     <h3> instructions </h3>
     <ul>
-      <li>past your deck in the window</li>
-      <li>click Generate</li>
+      <li>paste your deck in the window on the left</li>
+      <li>click the <b>Generate...</b> button</li>
       <li>wait for the pdf to be generated</li>
-      <li>download your pdf</li>
+      <li>download or view your pdf</li>
     </ul>
     <h3> notes </h3>
     <ul>
-      <li>i don't generate plain land proxies</li>
       <li>i don't (yet) understand things like x's etc between between the count and the card name</li>
       <li>the card name has to exectly correct (including case)</li>
-      <li>the download will expire in about 30 minutes. Dont worry, you can always regenerate the pdf</li>
+      <li>the download will expire in about 30 minutes. don't worry, you can always regenerate the pdf</li>
     </ul>
     <h3> thanks </h3>
     <ul>
-      <li></li>
+      <li>a huge thanks to Robert Schultz for <a href="http://mtgjson.com">mtgjson.com</a></li>
+      <li>thanks to WotC for creating an awsome game</li>
     </ul>
-
   </div>
 </div>
