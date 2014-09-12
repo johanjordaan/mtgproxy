@@ -6,107 +6,45 @@ errorController = ($scope,Errors) ->
   $scope.clear = ->
     Errors.length = 0
 
-menuController = ($scope,$location) ->
-  $scope.navigate = (destination) ->
-    $location.path destination
+mainController = ($scope,$timeout,Api) ->
+  $scope.deck = '''
+  1 Duress
+  1 Raging Goblin
+  1 Wrath of God
 
-  $scope.isSelected = (destination) ->
+  1 Duress
+  '''
 
-quizController = ($scope,Api,State) ->
-  $scope.State = State
+  $scope.link = ""
+  $scope.status = ""
+  $scope.requestCount = 0
 
-  $scope.question = do
-    question:"???"
+  poll = ->
+    Api.getRequestCount (data) ->
+      $scope.requestCount = data.count
+      $timeout ->
+        poll
+      ,3000
+  poll!
 
-  $scope.answer = false
-
-  if !State.CurrentQuestion?
-    Api.getQuestion { token:"johan",sets:State.selectedSets }, (data) ->
-      $scope.question = data
-      State.CurrentQuestion = data
-      $scope.image = "background-image: url(http://mtgimage.com/set/#{data.set_code}/#{data.question}-crop.jpg);"
-  else
-    $scope.question = State.CurrentQuestion
-
-  $scope.submitAnswer = (index) ->
-    Api.answerQuestion do
-      token: "johan"
-      question_id: $scope.question.id
-      answer_index: index
-      ,(data) ->
-
-        $scope.result = {}  
-        if data.correct
-          $scope.result.text = "Correct"
-          $scope.result.correct = true
-          $scope.result.incorrect = false
-        else
-          $scope.result.text = "Incorrect"
-          $scope.result.correct = false
-          $scope.result.incorrect = true
-
-        $scope.result.text = $scope.result.text + ",the answer was : #{$scope.question.options[data.correct_answer_index]}"
-        $scope.answer = true
-
-  $scope.next = ->
-    Api.getQuestion { token:"johan",sets:State.selectedSets }, (data) ->
-      $scope.question = data
-      State.CurrentQuestion = data
-      $scope.image = "background-image: url(http://mtgimage.com/set/#{data.set_code}/#{data.question}-crop.jpg);"
-      $scope.answer = false
-
-  $scope.showAnswer = ->
-    $scope.answer
-
-  $scope.showQuestion = ->
-    !$scope.answer
-
-
-settingsController = ($scope,Api,State) ->
-  $scope.state = State
-
-  switch State.sets?
-  | true =>
-  | otherwise =>
-    Api.getSets (data) ->
-      State.sets = data
-
-  $scope.toggleSetSelection = (set_code) ->
-    switch $scope.isSelected set_code
-    | true =>
-      switch State.selectedSets.length > 1
-      | false =>
-      | otherwise =>
-        State.selectedSets = State.selectedSets |> _.filter (item) ->
-          item != set_code
-    | otherwise =>
-      State.selectedSets.push set_code
-
-  $scope.isSelected = (set_code) ->
-    set_code in State.selectedSets
-
-
-
-
-
-statsController = ($scope,Api,State) ->
-
-userController = ($scope,Api,State) ->
-
+  $scope.generate = ->
+    $scope.status = "Generating..."
+    Api.generate { cardList: JSON.stringify($scope.deck) }, (data)->
+      $scope.link = "/docs/#{data.documentUrl}"
+      Api.getRequestCount (data) ->
+        $scope.requestCount = data.count
+      $timeout ->
+        $scope.status = "Download"
+      , 1000
 
 apiFactory = ($resource,ErrorHandler) ->
   do
-    getSets: (cb) ->
-      $resource '/api/v1/sets', null
-      .query {}, {}, cb, ErrorHandler
+    getRequestCount: (cb) ->
+      $resource '/api/v1/requestcount', null
+      .get {}, {}, cb, ErrorHandler
 
-
-    getQuestion: (data, cb) ->
-      $resource '/api/v1/questions', null
-      .save {}, data, cb, ErrorHandler
-
-    answerQuestion: (data, cb) ->
-      $resource '/api/v1/answers', null
+    generate: (data, cb) ->
+      $resource '/api/v1/generate', null
       .save {}, data, cb, ErrorHandler
 
 errorHandlerFactory = (Errors) ->
@@ -116,20 +54,8 @@ errorHandlerFactory = (Errors) ->
 config = ($routeProvider) ->
   $routeProvider
   .when '/home', do
-    templateUrl: 'quiz.html'
-    controller: 'quizController'
-
-  .when '/user', do
-    templateUrl: 'user.html'
-    controller: 'userController'
-
-  .when '/settings', do
-    templateUrl: 'settings.html'
-    controller: 'settingsController'
-
-  .when '/stats', do
-    templateUrl: 'stats.html'
-    controller: 'statsController'
+    templateUrl: 'main.html'
+    controller: 'mainController'
 
   .otherwise do
     redirectTo: '/home'
@@ -140,16 +66,9 @@ app = angular.module 'gameApp',['ngResource','ngRoute']
 app.factory 'Api',['$resource','ErrorHandler',apiFactory]
 app.factory 'ErrorHandler',['Errors',errorHandlerFactory]
 app.value 'Errors',[]
-app.value 'State', do
-  selectedSets: ['JOU']
 
 app.controller 'errorController', ['$scope','Errors',errorController]
-app.controller 'menuController', ['$scope','$location',menuController]
 
-app.controller 'quizController', ['$scope','Api','State',quizController]
-app.controller 'settingsController', ['$scope','Api','State',settingsController]
-app.controller 'statsController', ['$scope','Api','State',statsController]
-app.controller 'userController', ['$scope','Api','State',userController]
-
+app.controller 'mainController', ['$scope','$timeout','Api',mainController]
 
 app.config ['$routeProvider',config]

@@ -94,6 +94,10 @@ module.exports = (grunt) ->
            'angular/angular-resource.js': 'angular-resource/angular-resource.js'
            'prelude-browser.js': 'prelude-ls/browser/prelude-browser.js'
 
+           'bootstrap/bootstrap.css': 'bootstrap/dist/css/bootstrap.min.css'
+           'bootstrap/bootstrap.js': 'bootstrap/dist/js/bootstrap.min.js'
+           'jquery.js': 'jquery/dist/jquery.js'
+
     forever:
       adminServer:
         options:

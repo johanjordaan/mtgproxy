@@ -16,6 +16,7 @@ app = express()
 # Configure express
 app.use bodyParser.json()
 app.use '/',express.static(__dirname + '/client')
+app.use '/docs',express.static(__dirname + '/docs')
 
 
 server = (require 'http').createServer app
@@ -46,7 +47,7 @@ else
 
 # Setup the file cleanup
 cleanupFiles = ->
-  docPath = "./docs/"
+  docPath = "./dist/docs/"
   fs.readdir docPath, (err,files) ->
     | err? => console.log err
     | otherwise =>
@@ -171,8 +172,9 @@ loadDeck = (data, cb) ->
   mainDeckList = []
   sideBoardList = []
 
+  data = JSON.parse(data)
   data = data.replace(/\r?/g, '')
-  lines = data.split(/;/)
+  lines = data.split('\n')
   main = true
   for line in lines
     tokens = line.split(/[ ](.+)/)
@@ -198,5 +200,12 @@ app.post '/api/v1/generate/', (req, res) ->
     | err? => res.status(500).send err
     | otherwise =>
       loadDeck cardList, (mainDeck,sideBoard) ->
-        createDoc "./docs/#{savedRequest._id}.pdf" ,mainDeck
+        createDoc "./dist/docs/#{savedRequest._id}.pdf" ,mainDeck
         res.status(200).send { documentUrl:"#{savedRequest._id}.pdf" }
+
+
+
+app.get '/api/v1/requestcount/', (req, res) ->
+  db.requests.count {}, (err,count) ->
+    | err? => res.status(500).send err
+    | otherwise => res.status(200).send { count: count }
