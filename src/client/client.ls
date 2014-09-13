@@ -6,7 +6,7 @@ errorController = ($scope,Errors) ->
   $scope.clear = ->
     Errors.length = 0
 
-mainController = ($scope,$timeout,DeckParser,Api) ->
+mainController = ($scope,$timeout,Errors,DeckParser,Api) ->
   $scope.deck = '''
   1 Duress
   1 Raging Goblin
@@ -44,17 +44,24 @@ mainController = ($scope,$timeout,DeckParser,Api) ->
   $scope.generate = ->
     $scope.isGenerating = true
     $scope.hasLink = false
+    Errors.length = 0
 
     result = DeckParser.parse $scope.deck
 
-    Api.generate { cards: result.cards , skipBasicLands: $scope.skipBasicLands }, (data)->
-      $scope.link = "/docs/#{data.documentUrl}"
-      Api.getRequestCount (data) ->
-        $scope.requestCount = data.requestCount
-      $timeout ->
-        $scope.isGenerating = false
-        $scope.hasLink = true
-      , 1000
+    if result.errors.length == 0
+      Api.generate { cards: result.cards , skipBasicLands: $scope.skipBasicLands }, (data)->
+        $scope.link = "/docs/#{data.documentUrl}"
+        Api.getRequestCount (data) ->
+          $scope.requestCount = data.requestCount
+        $timeout ->
+          $scope.isGenerating = false
+          $scope.hasLink = true
+        , 1000
+    else
+      $scope.isGenerating = false
+      for error in result.errors
+        Errors.push "#{error.line} : #{error.message}"
+
 
 apiFactory = ($resource,ErrorHandler) ->
   do
@@ -88,6 +95,6 @@ app.value 'Errors',[]
 
 app.controller 'errorController', ['$scope','Errors',errorController]
 
-app.controller 'mainController', ['$scope','$timeout','DeckParser','Api',mainController]
+app.controller 'mainController', ['$scope','$timeout','Errors','DeckParser','Api',mainController]
 
 app.config ['$routeProvider',config]

@@ -40,13 +40,15 @@ deckParser.parse = (deckText) ->
   errors = []
 
   if deckText.trim().length == 0
-    errors.push { type:'warning', lineNo:0, line:deckText, 'empty input' }
+    errors.push { type:'warning', lineNo:0, line:deckText, message:'empty input' }
 
   lines = getLines deckText
 
   firstEmptyLine = -1
   emptyLineSBDelimiter = true
   for line,idx in lines
+    originalLine = line
+
     switch line.length
     | 0 =>
       # Track where the first empty line is. This will indicate the start
@@ -77,13 +79,13 @@ deckParser.parse = (deckText) ->
       #
       hasError = false
       if !newCard.name?
-        errors.push { type:'error', lineNo:idx, line:line, 'invalid line' }
+        errors.push { type:'error', lineNo:idx, line:originalLine, message:'invalid line' }
         hasError = true
       if newCard.count <= 0
-        errors.push { type:'error', lineNo:idx, line:line, 'invalid line' }
+        errors.push { type:'error', lineNo:idx, line:originalLine, message:'invalid line' }
         hasError = true
       if _.isItNaN newCard.count
-        errors.push { type:'error', lineNo:idx, line:line, 'invalid line' }
+        errors.push { type:'error', lineNo:idx, line:originalLine, message:'invalid line' }
         hasError = true
 
 

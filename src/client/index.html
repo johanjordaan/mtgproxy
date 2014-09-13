@@ -39,14 +39,13 @@
         </div>
       </div>
     </nav>
-
-    <div ng-view>
-    </div>
     <div ng-controller="errorController">
       <!--button ng-click="clear()">Clear</button-->
       <ul>
         <li ng-repeat="error in errors track by $index" >{{error}}</li>
       </ul>
     </div>
-  </body>
+    <div ng-view>
+    </div>
+    </body>
 </html>
