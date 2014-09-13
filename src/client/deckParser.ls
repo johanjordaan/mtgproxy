@@ -1,7 +1,8 @@
 _ = require 'prelude-ls'
 
 deckParser = {}
-module.exports = deckParser
+if module?
+  module.exports = deckParser
 
 
 getLines = (deckText) ->
@@ -35,9 +36,13 @@ getLines = (deckText) ->
     | otherwise => item
 
 deckParser.parse = (deckText) ->
-  lines = getLines deckText
+  cards = []
+  errors = []
 
-  allCards = []
+  if deckText.trim().length == 0
+    errors.push { type:'warning', lineNo:0, line:deckText, 'empty input' }
+
+  lines = getLines deckText
 
   firstEmptyLine = -1
   emptyLineSBDelimiter = true
@@ -63,17 +68,48 @@ deckParser.parse = (deckText) ->
         .replace(/\[(.*)]/,'')    # Remove the [ed] component
         .trim()
 
-      allCards.push do
+      newCard = do
         count: Number(tokens[0])
-        cardName: tokens[1]
+        name: tokens[1]
         sb: sb
+
+      # Do some validations
+      #
+      hasError = false
+      if !newCard.name?
+        errors.push { type:'error', lineNo:idx, line:line, 'invalid line' }
+        hasError = true
+      if newCard.count <= 0
+        errors.push { type:'error', lineNo:idx, line:line, 'invalid line' }
+        hasError = true
+      if _.isItNaN newCard.count
+        errors.push { type:'error', lineNo:idx, line:line, 'invalid line' }
+        hasError = true
+
+
+      # Do some more validations
+      #
+
+
+      if !hasError
+        cards.push  newCard
+
 
   # Post process the list to mark the SB cards if we used the empty line
   # method of delimiing SB from maindeck
   #
   if emptyLineSBDelimiter
-    for card,idx in allCards
+    for card,idx in cards
       if idx >= firstEmptyLine
         card.sb = true
 
-  allCards
+  return
+    cards: cards
+    errors: errors
+
+
+ngDeckParser = {}
+if angular?
+  console.log 'Hehe ///'
+  ngDeckParser := angular.module 'ngDeckParser',[]
+  ngDeckParser.constant 'DeckParser', deckParser

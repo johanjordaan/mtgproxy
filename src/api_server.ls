@@ -108,10 +108,6 @@ createDoc = (name,skipBasicLands,cards,text) ->
 
   doc.fontSize 10
 
-  # TODO: The blow needs to be refactored ... Duplicated code
-  text = JSON.parse(text)
-  text = text.replace(/\r?/g, '')
-  #lines = text.split('\n')
   doc.text text
   doc.addPage!
 
@@ -181,43 +177,48 @@ loadCards = (list,cb) ->
     cb results
 
 
-loadDeck = (data, cb) ->
+loadDeck = (cards, cb) ->
   mainDeckList = []
   sideBoardList = []
 
-  data = JSON.parse(data)
-  data = data.replace(/\r?/g, '')
-  lines = data.split('\n')
-  main = true
-  for line in lines
-    tokens = line.split(/[ ](.+)/)
-    if tokens.length<2
-      main = false
-    else
-      switch main
-      | true =>
-        for i to Number(tokens[0])-1
-          mainDeckList.push tokens[1]
-      | otherwise =>
-        for i to Number(tokens[0])-1
-          sideBoardList.push tokens[1]
+  for card in cards
+    switch card.sb
+    | true =>
+      for i to card.count-1
+        sideBoardList.push card.name
+    | otherwise =>
+      for i to card.count-1
+        mainDeckList.push card.name
 
   loadCards mainDeckList, (mainDeck) ->
     loadCards sideBoardList, (sideBoard) ->
       cb mainDeck, sideBoard
 
 
+# the input format is
+# [] of { count,name,sb }
 app.post '/api/v1/generate/', (req, res) ->
-  cardList = req.body.cardList
+  cards = req.body.cards
   skipBasicLands = req.body.skipBasicLands
+
+  text = ''
+  for card in cards
+    if !card.sb
+      text = text + "#{card.count} #{card.name}\n"
+
+  text = text + "\n"
+  for card in cards
+    if card.sb
+      text = text + "#{card.count} #{card.name}\n"
+
 
   if !skipBasicLands then skipbasicLands = true
 
-  db.requests.save {cardList:cardList}, (err, savedRequest) ->
+  db.requests.save {cards:cards}, (err, savedRequest) ->
     | err? => res.status(500).send err
     | otherwise =>
-      loadDeck cardList, (mainDeck,sideBoard) ->
-        createDoc "./dist/docs/#{savedRequest._id}.pdf",skipBasicLands,mainDeck++sideBoard,cardList
+      loadDeck cards, (mainDeck,sideBoard) ->
+        createDoc "./dist/docs/#{savedRequest._id}.pdf",skipBasicLands,mainDeck++sideBoard,text
         res.status(200).send { documentUrl:"#{savedRequest._id}.pdf" }
 
 

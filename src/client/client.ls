@@ -6,7 +6,7 @@ errorController = ($scope,Errors) ->
   $scope.clear = ->
     Errors.length = 0
 
-mainController = ($scope,$timeout,Api) ->
+mainController = ($scope,$timeout,DeckParser,Api) ->
   $scope.deck = '''
   1 Duress
   1 Raging Goblin
@@ -44,7 +44,10 @@ mainController = ($scope,$timeout,Api) ->
   $scope.generate = ->
     $scope.isGenerating = true
     $scope.hasLink = false
-    Api.generate { cardList: JSON.stringify($scope.deck), skipBasicLands: $scope.skipBasicLands }, (data)->
+
+    result = DeckParser.parse $scope.deck
+
+    Api.generate { cards: result.cards , skipBasicLands: $scope.skipBasicLands }, (data)->
       $scope.link = "/docs/#{data.documentUrl}"
       Api.getRequestCount (data) ->
         $scope.requestCount = data.requestCount
@@ -77,7 +80,7 @@ config = ($routeProvider) ->
     redirectTo: '/home'
 
 
-app = angular.module 'gameApp',['ngResource','ngRoute']
+app = angular.module 'gameApp',['ngResource','ngRoute','ngDeckParser']
 
 app.factory 'Api',['$resource','ErrorHandler',apiFactory]
 app.factory 'ErrorHandler',['Errors',errorHandlerFactory]
@@ -85,6 +88,6 @@ app.value 'Errors',[]
 
 app.controller 'errorController', ['$scope','Errors',errorController]
 
-app.controller 'mainController', ['$scope','$timeout','Api',mainController]
+app.controller 'mainController', ['$scope','$timeout','DeckParser','Api',mainController]
 
 app.config ['$routeProvider',config]

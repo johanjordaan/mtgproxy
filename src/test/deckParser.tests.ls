@@ -17,11 +17,12 @@ describe 'deckParser', (done) ->
       2  [7E]   Counterspell
       '''
 
-      cards = deckParser.parse deck
+      result = deckParser.parse deck
 
-      cards.length.should.equal 4
-      mainDeck = cards |> _.filter (item) -> !item.sb
-      sideBoard = cards |> _.filter (item) -> item.sb
+      result.errors.length.should.equal 0
+      result.cards.length.should.equal 4
+      mainDeck = result.cards |> _.filter (item) -> !item.sb
+      sideBoard = result.cards |> _.filter (item) -> item.sb
 
       mainDeck.length.should.equal 3
       sideBoard.length.should.equal 1
@@ -41,14 +42,41 @@ describe 'deckParser', (done) ->
       SB:2xFireball
       '''
 
-      cards = deckParser.parse deck
+      result = deckParser.parse deck
 
-      cards.length.should.equal 5
-      mainDeck = cards |> _.filter (item) -> !item.sb
-      sideBoard = cards |> _.filter (item) -> item.sb
+      result.errors.length.should.equal 0
+      result.cards.length.should.equal 5
+      mainDeck = result.cards |> _.filter (item) -> !item.sb
+      sideBoard = result.cards |> _.filter (item) -> item.sb
 
       mainDeck.length.should.equal 3
       sideBoard.length.should.equal 2
 
 
+      done!
+
+
+  describe 'pasing invalid decks', (done) ->
+    it 'should fail nicely', (done) ->
+      result = deckParser.parse ''
+      result.cards.length.should.equal 0
+      result.errors.length.should.equal 1
+      done!
+
+    it 'should fail nicely', (done) ->
+      result = deckParser.parse 'x wwww w w w'
+      result.cards.length.should.equal 0
+      result.errors.length.should.equal 1
+      done!
+
+    it 'should fail nicely', (done) ->
+      result = deckParser.parse '100'
+      result.cards.length.should.equal 0
+      result.errors.length.should.equal 1
+      done!
+
+    it 'should fail nicely', (done) ->
+      result = deckParser.parse 'SSS: 100 Wrath of God'
+      result.cards.length.should.equal 0
+      result.errors.length.should.equal 1
       done!
