@@ -142,6 +142,12 @@ createDoc = (name,skipBasicLands,cards,text) ->
         doc.fontSize 12
         doc.text card.pt,(w/3)*x,offset+((h/3)*y)+padding+(190),{ width: w/3 -padding, align: 'right'}
 
+      if card.sb?
+        doc.fontSize 12
+        doc.text "  [SB]",(w/3)*x,offset+((h/3)*y)+padding+(190),{ width: w/3 -padding, align: 'left'}
+
+
+
       x = x+1
       if x%3 == 0
         x = 0
@@ -192,6 +198,8 @@ loadDeck = (cards, cb) ->
 
   loadCards mainDeckList, (mainDeck) ->
     loadCards sideBoardList, (sideBoard) ->
+      for card in sideBoard
+        card.sb = true
       cb mainDeck, sideBoard
 
 
