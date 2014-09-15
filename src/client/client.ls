@@ -59,8 +59,9 @@ mainController = ($scope,$timeout,Errors,DeckParser,Api) ->
         , 1000
     else
       $scope.isGenerating = false
-      for error in result.errors
-        Errors.push "#{error.line} : #{error.message}"
+      Errors.push "error parsing deck"
+      #for error in result.errors
+      #  Errors.push "#{error.line} : #{error.message}"
 
 
 apiFactory = ($resource,ErrorHandler) ->
