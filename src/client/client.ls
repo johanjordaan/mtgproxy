@@ -25,7 +25,7 @@ mainController = ($scope,$timeout,Errors,DeckParser,Api) ->
     Api.getRequestCount (data) ->
       $scope.requestCount = data.requestCount
       $timeout ->
-        poll
+        poll!
       ,3000
   poll!
 
