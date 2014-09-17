@@ -1,0 +1,4 @@
+cd /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-enabled/mtgproxy.abicat.com/nginx.conf mtgproxy.abicat.com
+nginx -s stop
+nginx 
