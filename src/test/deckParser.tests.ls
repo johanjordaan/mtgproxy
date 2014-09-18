@@ -1,60 +1,49 @@
 _ = require 'prelude-ls'
+fs = require 'fs'
 assert = require('assert')
 should = require('chai').should()
 expect = require('chai').expect
 
 deckParser = require '../client/deckParser'
 
+
+decks = [
+  { name:"various_formats_no_sb", crdlines:4, mdl:13, sbl:0 }
+  { name:"various_formats_nl_sb", crdlines:5, mdl:13, sbl:2 }
+  { name:"various_formats_sb_sb", crdlines:6, mdl:13, sbl:4 }
+  { name:"mtgo_deck", crdlines:25, mdl:60, sbl:15  }
+]
+
+testDeck = (spec,done) ->
+  it "should parse [#{spec.name}]", (done) ->
+    fs.readFile "./src/test/test_decks/#{spec.name}.txt",'utf8',(err,data) ->
+      result = deckParser.parse data
+      result.errors.length.should.equal 0
+      result.cards.length.should.equal spec.crdlines
+      mainDeck = result.cards |> _.filter (item) -> !item.sb
+      sideBoard = result.cards |> _.filter (item) -> item.sb
+
+      mainDeckCount = _.fold (a,b) ->
+        a + b.count
+      ,0
+      ,mainDeck
+
+      sideBoardCount = _.fold (a,b) ->
+        a + b.count
+      ,0
+      ,sideBoard
+
+      mainDeckCount.should.equal spec.mdl
+      sideBoardCount.should.equal spec.sbl
+
+      done!
+
+
+
 describe 'deckParser', (done) ->
-  describe 'parse deck with newline delimiter', (done) ->
-    it 'should parse deck with newline delimiting the SB deck into JSON', (done) ->
-      deck = '''
-      // This is my sample deck
-      1xWrath of God     # My awsome card ....
-      10x  Plains         ; Silly land
-      1 Raging Goblin   // What an awesome card
-
-      2  [7E]   Counterspell
-      '''
-
-      result = deckParser.parse deck
-
-      result.errors.length.should.equal 0
-      result.cards.length.should.equal 4
-      mainDeck = result.cards |> _.filter (item) -> !item.sb
-      sideBoard = result.cards |> _.filter (item) -> item.sb
-
-      mainDeck.length.should.equal 3
-      sideBoard.length.should.equal 1
-
-
-      done!
-
-  describe 'parse deck with SB delimiter', (done) ->
-    it 'should parse deck with newline delimiting the SB deck into JSON', (done) ->
-      deck = '''
-      // This is my sample deck
-      1xWrath of God     # My awsome card ....
-      10x  Plains         ; Silly land
-      1 Raging Goblin   // What an awesome card
-
-      SB :2x Duress
-      SB:2xFireball
-      '''
-
-      result = deckParser.parse deck
-
-      result.errors.length.should.equal 0
-      result.cards.length.should.equal 5
-      mainDeck = result.cards |> _.filter (item) -> !item.sb
-      sideBoard = result.cards |> _.filter (item) -> item.sb
-
-      mainDeck.length.should.equal 3
-      sideBoard.length.should.equal 2
-
-
-      done!
-
+  describe 'it should parse all the sample decks', (done) ->
+    for deck in decks
+      testDeck deck,done
 
   describe 'pasing invalid decks', (done) ->
     it 'should fail nicely', (done) ->

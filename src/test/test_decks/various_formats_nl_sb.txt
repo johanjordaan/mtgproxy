@@ -1,0 +1,7 @@
+// This is my sample deck
+1xWrath of God     # My awsome card ....
+10x  Plains         ; Silly land
+1 Raging Goblin   // What an awesome card
+1   Island
+
+2  [7E]   Counterspell

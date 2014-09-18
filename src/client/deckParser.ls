@@ -11,6 +11,11 @@ getLines = (deckText) ->
   deckText = deckText.replace /\r?/g, ''
   lines = deckText.split '\n'
 
+  # Replace all whitespace characters with a single space character
+  #
+  lines = lines |> _.map (item) -> item.replace /\s/g,' '
+
+
   # Convert comment types to unified comment type
   #
   lines  = lines |> _.map (item) -> item.replace '#','//'
@@ -19,6 +24,11 @@ getLines = (deckText) ->
   # Trim all leading and training empty spaces
   #
   lines  = lines |> _.map (item) -> item.trim()
+
+  # Remove the word sideboard sothat mtgo decks are readable
+  #
+  lines  = lines |> _.map (item) -> item.replace 'Sideboard',''
+
 
   # Remove all lines starting with comment //
   #
@@ -102,7 +112,7 @@ deckParser.parse = (deckText) ->
   #
   if emptyLineSBDelimiter
     for card,idx in cards
-      if idx >= firstEmptyLine
+      if firstEmptyLine != -1 and idx >= firstEmptyLine
         card.sb = true
 
   return
