@@ -6,7 +6,7 @@ errorController = ($scope,Errors) ->
   $scope.clear = ->
     Errors.length = 0
 
-mainController = ($scope,$interval,Errors,DeckParser,Api) ->
+mainController = ($scope,$interval,$timeout,Errors,DeckParser,Api) ->
   $scope.deck = '''
   1 Duress
   1 Raging Goblin
@@ -27,7 +27,7 @@ mainController = ($scope,$interval,Errors,DeckParser,Api) ->
       $scope.requestCount = data.requestCount
 
   pollPromise = $interval poll, 5000
-  $scope.$on '$destroy', () ->
+  $scope.$on '$destroy',  ->
     if angular.isDefined pollPromise
       $interval.cancel pollPromise
       pollPromise = undefined
@@ -99,6 +99,6 @@ app.value 'Errors',[]
 
 app.controller 'errorController', ['$scope','Errors',errorController]
 
-app.controller 'mainController', ['$scope','$interval','Errors','DeckParser','Api',mainController]
+app.controller 'mainController', ['$scope','$interval','$timeout','Errors','DeckParser','Api',mainController]
 
 app.config ['$routeProvider',config]
