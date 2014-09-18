@@ -89,14 +89,14 @@ module.exports = (grunt) ->
         options:
            destPrefix: 'dist/client/libs'
         files:
-           'angular/angular.js': 'angular/angular.js'
-           'angular/angular-route.js': 'angular-route/angular-route.js'
-           'angular/angular-resource.js': 'angular-resource/angular-resource.js'
+           'angular/angular.js': 'angular/angular.min.js'
+           'angular/angular-route.js': 'angular-route/angular-route.min.js'
+           'angular/angular-resource.js': 'angular-resource/angular-resource.min.js'
            'prelude-browser.js': 'prelude-ls/browser/prelude-browser.js'
 
            'bootstrap/bootstrap.css': 'bootstrap/dist/css/bootstrap.min.css'
            'bootstrap/bootstrap.js': 'bootstrap/dist/js/bootstrap.min.js'
-           'jquery.js': 'jquery/dist/jquery.js'
+           'jquery.js': 'jquery/dist/jquery.min.js'
 
     forever:
       adminServer:
