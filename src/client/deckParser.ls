@@ -112,6 +112,5 @@ deckParser.parse = (deckText) ->
 
 ngDeckParser = {}
 if angular?
-  console.log 'Hehe ///'
   ngDeckParser := angular.module 'ngDeckParser',[]
   ngDeckParser.constant 'DeckParser', deckParser

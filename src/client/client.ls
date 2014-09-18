@@ -6,7 +6,7 @@ errorController = ($scope,Errors) ->
   $scope.clear = ->
     Errors.length = 0
 
-mainController = ($scope,$timeout,Errors,DeckParser,Api) ->
+mainController = ($scope,$interval,Errors,DeckParser,Api) ->
   $scope.deck = '''
   1 Duress
   1 Raging Goblin
@@ -21,13 +21,16 @@ mainController = ($scope,$timeout,Errors,DeckParser,Api) ->
   $scope.isGenerating = false
   $scope.skipBasicLands = true
 
+
   poll = ->
     Api.getRequestCount (data) ->
       $scope.requestCount = data.requestCount
-      $timeout ->
-        poll!
-      ,3000
-  poll!
+
+  pollPromise = $interval poll, 5000
+  $scope.$on '$destroy', () ->
+    if angular.isDefined pollPromise
+      $interval.cancel pollPromise
+      pollPromise = undefined
 
   $scope.$watch 'skipBasicLands', (oldVal,newVal) ->
     localStorage["mtgproxy.skipBasicLands"] = $scope.skipBasicLands
@@ -96,6 +99,6 @@ app.value 'Errors',[]
 
 app.controller 'errorController', ['$scope','Errors',errorController]
 
-app.controller 'mainController', ['$scope','$timeout','Errors','DeckParser','Api',mainController]
+app.controller 'mainController', ['$scope','$interval','Errors','DeckParser','Api',mainController]
 
 app.config ['$routeProvider',config]
