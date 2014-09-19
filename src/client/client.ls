@@ -32,6 +32,8 @@ mainController = ($scope,$interval,$timeout,Errors,DeckParser,Api) ->
       $interval.cancel pollPromise
       pollPromise = undefined
 
+  poll!
+
   $scope.$watch 'skipBasicLands', (oldVal,newVal) ->
     localStorage["mtgproxy.skipBasicLands"] = $scope.skipBasicLands
 
