@@ -22,6 +22,13 @@ mainController = ($scope,$interval,$timeout,Errors,DeckParser,Api) ->
   $scope.skipBasicLands = true
 
 
+  $scope.editorOptions =
+    lineNumbers: true
+    indentWithTabs: true
+    onLoad: (editor) ->
+      $scope.editor = editor
+      editor.setSize 300,600
+
   poll = ->
     Api.getRequestCount (data) ->
       $scope.requestCount = data.requestCount
@@ -51,6 +58,11 @@ mainController = ($scope,$interval,$timeout,Errors,DeckParser,Api) ->
     $scope.hasLink = false
     Errors.length = 0
 
+
+    # Clear previouse marking
+    for i to $scope.editor.doc.lineCount!
+      $scope.editor.doc.removeLineClass i, 'background'
+
     result = DeckParser.parse $scope.deck
 
     if result.errors.length == 0
@@ -65,8 +77,9 @@ mainController = ($scope,$interval,$timeout,Errors,DeckParser,Api) ->
     else
       $scope.isGenerating = false
       Errors.push "error parsing deck"
-      #for error in result.errors
-      #  Errors.push "#{error.line} : #{error.message}"
+      for error in result.errors
+        $scope.editor.doc.addLineClass error.lineNo, 'background', 'line-error'
+        #Errors.push "#{error.line} : #{error.message}"
 
 
 apiFactory = ($resource,ErrorHandler) ->
@@ -93,7 +106,7 @@ config = ($routeProvider) ->
     redirectTo: '/home'
 
 
-app = angular.module 'gameApp',['ngResource','ngRoute','ngDeckParser']
+app = angular.module 'gameApp',['ngResource','ngRoute','ngDeckParser','ui.codemirror']
 
 app.factory 'Api',['$resource','ErrorHandler',apiFactory]
 app.factory 'ErrorHandler',['Errors',errorHandlerFactory]

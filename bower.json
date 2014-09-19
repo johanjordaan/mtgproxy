@@ -8,6 +8,7 @@
     "angular-resource": "1.2.22",
     "prelude-ls": "~1.1.1",
     "bootstrap": "~3.2.0",
-    "jquery": "~2.1.1"
+    "jquery": "~2.1.1",
+    "angular-ui-codemirror": "~0.1.6"
   }
 }

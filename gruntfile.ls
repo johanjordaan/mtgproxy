@@ -98,6 +98,10 @@ module.exports = (grunt) ->
           'bootstrap/bootstrap.js': 'bootstrap/dist/js/bootstrap.min.js'
           'jquery.js': 'jquery/dist/jquery.min.js'
 
+          'codemirror/codemirror.css': 'codemirror/lib/codemirror.css'
+          'codemirror/codemirror.js': 'codemirror/lib/codemirror.js'
+          'codemirror/ui-codemirror.js': 'angular-ui-codemirror/ui-codemirror.min.js'
+
           # This has been added to avoid the browser error
           #
           'angular/angular.min.js.map': 'angular/angular.min.js.map'
