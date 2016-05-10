@@ -19,20 +19,21 @@ importAllCards = (fileName) ->
           cards = JSON.parse(data)
           inserts = []
           for cardName in _.keys cards
-            console.log cardName
+            console.log
             card = cards[cardName]
             x = (card) ->
               inserts.push (cb) ->
                 # Customisations
                 if card.power? then card.pt = "#{card.power}/#{card.toughness}"
                 if card.colors? then card.color = _.join " ",card.colors
+                console.log "Saving #{card.name} ... "
                 db.cards.save card,(err) ->
                   | err? =>
                      cb(null,err)
                      console.log err
                   | otherwise => cb(null,true)
             x card
-            console.log inserts.length
+            console.log "#{cardName}, #{inserts.length}"
           async.parallel inserts, (err,results) ->
             console.log err
             if results?
