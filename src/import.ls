@@ -33,6 +33,7 @@ importAllCards = (fileName) ->
                   | otherwise => cb(null,true)
             x card
           async.parallel inserts, (err,results) ->
+            console.log len(inserts)
             db.close!
 
 importAllCards './AllCards.json'
