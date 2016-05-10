@@ -32,6 +32,7 @@ importAllCards = (fileName) ->
                      console.log err
                   | otherwise => cb(null,true)
             x card
+            console.log inserts.length
           async.parallel inserts, (err,results) ->
             console.log err
             if results?
