@@ -35,7 +35,7 @@ importAllCards = (fileName) ->
             x card
             console.log "#{cardName}, #{inserts.length}"
           async.parallel inserts, (err,results) ->
-            console.log err
+            console.log "... #{err}"
             if results?
                console.log results.length
             if inserts?
