@@ -29,8 +29,8 @@ importAllCards = (fileName) ->
                 console.log "Saving #{card.name} ... "
                 db.cards.save card,(err) ->
                   | err? =>
-                     cb(null,err)
                      console.log err
+                     cb(null,err)
                   | otherwise => cb(null,true)
             x card
             console.log "#{cardName}, #{inserts.length}"
