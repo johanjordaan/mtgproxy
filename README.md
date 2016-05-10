@@ -16,3 +16,4 @@ If you find it useful or have any feature requests please let me know.
 
 
 ##Technical Details
+Remember to forever the api_server.js in dist
