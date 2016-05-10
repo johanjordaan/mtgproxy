@@ -19,6 +19,7 @@ importAllCards = (fileName) ->
           cards = JSON.parse(data)
           inserts = []
           for cardName in _.keys cards
+            console.log cardName
             card = cards[cardName]
             x = (card) ->
               inserts.push (cb) ->
