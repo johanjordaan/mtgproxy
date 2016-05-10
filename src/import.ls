@@ -27,7 +27,9 @@ importAllCards = (fileName) ->
                 if card.power? then card.pt = "#{card.power}/#{card.toughness}"
                 if card.colors? then card.color = _.join " ",card.colors
                 db.cards.save card,(err) ->
-                  | err? => cb(null,err)
+                  | err? =>
+                     cb(null,err)
+                     console.log err
                   | otherwise => cb(null,true)
             x card
           async.parallel inserts, (err,results) ->
